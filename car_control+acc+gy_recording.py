@@ -10,6 +10,8 @@ def normalize(value, min_value, max_value):
     """Normalize a value to the range [0, 1]."""
     return (value - min_value) / (max_value - min_value)
 
+
+
 def main():
     try:
         pygame.init()
@@ -24,6 +26,24 @@ def main():
         spawn_point = world.get_map().get_spawn_points()[0]
         ego_vehicle = world.spawn_actor(vehicle_bp, spawn_point)
         print("Vehicle spawned!")
+        friction_bp = world.get_blueprint_library().find('static.trigger.friction')
+        #how much area does the friction function affect 
+        extent = carla.Location(200000.0, 200000.0, 2000.0)
+        #change the str 'friction' value to change friction in the entire world
+        friction_bp.set_attribute('friction', str(100.0))
+        friction_bp.set_attribute('extent_x', str(extent.x))
+        friction_bp.set_attribute('extent_y', str(extent.y))
+        friction_bp.set_attribute('extent_z', str(extent.z))
+
+        # Spawn Trigger Friction
+        transform = carla.Transform()
+        transform.location = carla.Location(100.0, 0.0, 0.0)
+        world.spawn_actor(friction_bp, transform)
+
+        # Optional for visualizing trigger
+        world.debug.draw_box(box=carla.BoundingBox(transform.location,extent * 1e-2), rotation=transform.rotation, life_time=100, thickness=0.5, color=carla.Color(r=255,g=0,b=0))
+
+        # Apply high friction to the vehicle
 
         camera_bp = blueprint_library.find('sensor.camera.rgb')
         camera_bp.set_attribute('image_size_x', '800')
